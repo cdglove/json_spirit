@@ -13,13 +13,14 @@ cmake_minimum_required( VERSION 2.8.11 )
 project( json_spirit )
 
 option(JSON_SPIRIT_DEBUG_PARSER "Trace spirit parser in Debug config" OFF)
+option(JSON_SPIRIT_ENABLE_TESTS "Build tests" ON)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   add_definitions( -std=c++11 )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   add_definitions( -ftemplate-depth=300 )
   add_definitions( -std=c++0x )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   add_definitions( /wd4996 )
 endif()
 
@@ -38,12 +39,16 @@ include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 file( GLOB SRC_FILES libs/json/src/*.cpp )
 add_library( json STATIC ${SRC_FILES} )
 
+target_include_directories( json PUBLIC . )
+target_include_directories( json PUBLIC SYSTEM ${Boost_INCLUDE_DIRS} )
+
 if(JSON_SPIRIT_DEBUG_PARSER)
   target_compile_definitions(
       json PUBLIC "$<$<CONFIG:Debug>:BOOST_SPIRIT_DEBUG>"
   )
 endif()
 
-enable_testing()
-
-add_subdirectory( libs/json/test )
+if(JSON_SPIRIT_ENABLE_TESTS)
+	enable_testing()
+	add_subdirectory( libs/json/test )
+endif()
